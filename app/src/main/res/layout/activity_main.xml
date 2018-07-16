@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/spotifindme"
+        android:layout_gravity="center"
+        android:contentDescription="@string/app_name" />
+
+    <com.joanzapata.iconify.widget.IconTextView
+        android:id="@+id/user_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/user_name"
+        android:textAlignment="center"
+        android:textColor="#999"
+        android:textSize="20sp" />
+
+    <ListView
+        android:id="@+id/device_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="NestedScrolling"
+        android:layout_marginBottom="20dp"/>
+
+    <include
+        layout="@layout/item_beacon"
+        android:id="@+id/beacon_info_1"/>
+
+    <include
+        layout="@layout/item_beacon"
+        android:id="@+id/beacon_info_2"/>
+
+</LinearLayout>
+

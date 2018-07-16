@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">SpotifindMe</string>
+
+    <string name="login_logo">{fa-spotify}</string>
+    <string name="login_text">Click to Login with Spotify</string>
+
+    <string name="spotify_token_found">Valid Spotify auth token found</string>
+    <string name="spotify_auth_error">Spotify Auth Error: %1$s</string>
+
+    <string name="user_name">{fa-spotify} %1$s</string>
+    <string name="user_name_unknown">{fa-spotify} ..who are you?</string>
+
+    <string name="device_active">{fa-play-circle}</string>
+
+    <string name="beacon_id">%1$d</string>
+    <string name="beacon_distance">%1$.3fm</string>
+</resources>
