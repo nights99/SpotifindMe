@@ -68,4 +68,7 @@ public interface SpotifyRestApi {
      */
     @PUT("/v1/me/player")
     Call<ResponseBody> transferPlayback(@Body PlaybackTransfer body);
+
+    @PUT("/v1/me/player/pause")
+    Call<ResponseBody> pausePlayback(@Body String device_id);
 }

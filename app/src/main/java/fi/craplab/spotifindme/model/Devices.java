@@ -29,7 +29,7 @@ import java.util.List;
  * Devices API Model.
  *
  * @see <a href="https://developer.spotify.com/documentation/web-api/reference/player/get-a-users-available-devices/">
- *     <em>Get a User's Available Desvices</em> API description</a>
+ *     <em>Get a User's Available Devices</em> API description</a>
  */
 public class Devices {
     public List<Device> devices;

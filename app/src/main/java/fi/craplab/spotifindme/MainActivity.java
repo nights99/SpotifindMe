@@ -25,15 +25,17 @@ package fi.craplab.spotifindme;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -47,6 +49,9 @@ import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -75,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
      * Prints the beacon's id, rssi and distance.
      * Can be useful for debugging and curiosity, but is also rather noisy in the log
      */
-    private static final boolean PRINT_BEACON_INFO = false;
+    private static final boolean PRINT_BEACON_INFO = true;
 
     /** {@link Log} Tag */
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -133,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "Activity create");
         setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();
@@ -188,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "Activity resume");
+
         String token = TokenHandler.getToken(this);
         if (token == null) {
             Toast.makeText(this, "Auth token expired", Toast.LENGTH_SHORT).show();
@@ -217,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "Bluetooth enabled now");
@@ -247,14 +256,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
      */
     private void setupBluetooth() {
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_LOCATION_PERMISSION);
         } else {
-            beaconManager = BeaconManager.getInstanceForApplication(this);
-            beaconManager.bind(this);
+            //beaconManager = BeaconManager.getInstanceForApplication(this);
+            //beaconManager.bind(this);
         }
     }
 
@@ -318,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
      *
      * @param deviceName Name of the device to transfer playback to
      */
-    private void transferPlayback(String deviceName) {
+    void transferPlayback(String deviceName) {
         for (Device device : devices.devices) {
             if (device.deviceName.equals(deviceName)) {
                 transferPlayback(device);
@@ -532,5 +541,58 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         } else if (d1 < 1.5 && currentDevice.equals(myDevices[1])) {
             transferPlayback(myDevices[0]);
         }
+    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(BTSCanService.DeviceMsg event) {
+        Log.d(TAG, "Got event "+ event.getName());
+        Device device = null;
+        if (devices == null) {
+            return;
+        }
+        for (Device d : devices.devices) {
+            if (d.deviceName.equals(event.getName())) {
+                device = d;
+                break;
+            }
+        }
+        if (event.getFound()) {
+            transferPlayback(event.getName());
+        } else {
+            Call<ResponseBody> call = spotifyRestApi.pausePlayback(device.deviceId);
+
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call,
+                                       @NonNull final Response<ResponseBody> response) {
+
+                    new Handler().postDelayed(() -> {
+                        Log.d(TAG, "got pause response: " + response.toString());
+                        transferOngoing = false;
+                        getUserDevices();
+                    }, 1000);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    Log.e(TAG, "pausing playback failed", t);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "Activity start");
+//        this.startForegroundService(new Intent(this, BTSCanService.class));
+        this.startForegroundService(new Intent(this, BTSCanService.class));
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "Activity stop");
+        EventBus.getDefault().unregister(this);
     }
 }

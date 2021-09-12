@@ -25,14 +25,15 @@ package fi.craplab.spotifindme;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.spotify.sdk.android.auth.AuthorizationClient;
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 /**
  * Initial activity, checks if we have a valid Spotify auth token stored and either proceeds to the
@@ -44,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
     /** SpotifindMe client ID, used to identify the application with Spotify itself */
-    private static final String CLIENT_ID = "b46f4b94cd97465e93bd3fe8c17e9802";
+    private static final String CLIENT_ID = "b8b6373e77414ae181cd6446db6b595d";
     /** Spotify auth redirect URL */
     private static final String REDIRECT_URI = "spotifindme://redirect";
     /** Spotify Auth Request identifier used in {@link #onActivityResult(int, int, Intent)} */
@@ -93,12 +94,12 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void onLoginButtonClicked(View view) {
         System.out.println("View == " + view.toString() + " tag " + view.getTag() + " id " + view.getId());
-        final AuthenticationRequest request = new AuthenticationRequest
-                .Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
+        final AuthorizationRequest request = new AuthorizationRequest
+                .Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
                 .setScopes(authScopes)
                 .build();
 
-        AuthenticationClient.openLoginActivity(this, REQUEST_SPOTIFY_AUTH, request);
+        AuthorizationClient.openLoginActivity(this, REQUEST_SPOTIFY_AUTH, request);
     }
 
     /**
@@ -121,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+        AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, intent);
 
         switch (response.getType()) {
             case TOKEN:
