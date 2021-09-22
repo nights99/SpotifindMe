@@ -4,6 +4,7 @@ import android.app.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
@@ -40,12 +41,13 @@ class BTSCanService : Service() {
         bluetoothManager.adapter
     }
     private val scanSettings = ScanSettings.Builder()
-        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // TODO change to low power
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
         .build()
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
-//            TODO need to only send pause when not already paused, change icon, do we need to send play as well as transfer?
+//            TODO need to only send pause when not already paused, change icon,
+//             do we need to send play as well as transfer? (autoplay set to true, so shouldn't?)
             with(result.device) {
                 Log.i(
                     "ScanCallback",
@@ -55,6 +57,7 @@ class BTSCanService : Service() {
             if ((result.device.name == "BLAST")) {
                 if ((result.rssi > -70)) {
                     if (result.device.name != foundDevice) {
+//                        TODO need to change to have service control playback
                         EventBus.getDefault().post(DeviceMsg(result.device.name, true))
                         foundDevice = result.device.name
                     }
@@ -63,6 +66,18 @@ class BTSCanService : Service() {
                     foundDevice = null
 
                 }
+            }
+        }
+        override fun onScanFailed(errorCode: Int) {
+            Log.i(TAG, "Scan error: $errorCode")
+            super.onScanFailed(errorCode)
+        }
+
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            Log.i(TAG, "Scan batch results")
+            super.onBatchScanResults(results)
+            results?.forEach { i ->
+                Log.i(TAG, "Scan batch results: ${i.device.name}")
             }
         }
     }
@@ -89,12 +104,16 @@ class BTSCanService : Service() {
         super.onDestroy()
         Log.d(TAG, "service destroy")
     }
+    private val filters = arrayListOf<ScanFilter>()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Log.d(TAG, "service onStartCommand")
 //        TODO Add filter - no filter gets killed on screen off
-        bleScanner.startScan(null, scanSettings, scanCallback)
+//        For some reason, filter by name doesn't work, but MAC addr does.
+//        filters.add(ScanFilter.Builder().setDeviceName("BLAST").build())
+        filters.add(ScanFilter.Builder().setDeviceAddress("EC:81:93:11:C4:41").build())
+        bleScanner.startScan(filters, scanSettings, scanCallback)
         return START_STICKY
     }
 
