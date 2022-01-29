@@ -146,7 +146,6 @@ class BTSCanService : Service() {
 
         }
 
-//        TODO add exit button
         Log.d(TAG, "service start")
         //bleScanner.startScan(null, scanSettings, scanCallback)
     }
@@ -164,7 +163,6 @@ class BTSCanService : Service() {
         Log.d(TAG, "service onStartCommand")
         this.bcReceiver = StopServerBroadcast()
         this.registerReceiver(this.bcReceiver, IntentFilter("foo-ignored"))
-//        TODO Add filter - no filter gets killed on screen off
 //        For some reason, filter by name doesn't work, but MAC address does.
 //        filters.add(ScanFilter.Builder().setDeviceName("BLAST").build())
         filters.add(ScanFilter.Builder().setDeviceAddress("EC:81:93:11:C4:41").build())

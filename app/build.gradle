@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "fi.craplab.spotifindme"
         minSdkVersion 26 // 21 == BLE peripheral support, 18 == BLE central support, let's see what we need in the end
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -24,17 +24,18 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2' // stupid spotify auth api
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1' // stupid spotify auth api
+    implementation 'com.google.android.material:material:1.5.0'
 //    implementation 'com.android.support:design:27.0.2'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.github.kaaes:spotify-web-api-android:0.4.1'
     implementation 'com.spotify.android:auth:1.2.5'
-    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.google.code.gson:gson:2.6.2'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2'
+    //noinspection GradleDynamicVersion
     implementation 'org.altbeacon:android-beacon-library:2+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'org.greenrobot:eventbus:3.2.0'
@@ -58,7 +59,7 @@ buildscript {
        maven { url 'https://www.testfairy.com/maven' }
    }
    dependencies {
-       classpath 'com.testfairy.plugins.gradle:testfairy:3.+'
+       classpath 'com.testfairy.plugins.gradle:testfairy:3.6'
    }
 }
 apply plugin: 'testfairy'
